@@ -1,0 +1,47 @@
+version: '3.8'
+services:
+  monitor:
+    build: .
+    container_name: monitor
+    command: java -cp /app detector.monitor.NodeMonitor 172.20.0.2:5001 172.20.0.3:5002 172.20.0.4:5003
+    networks:
+      monitor_net:
+        ipv4_address: 172.20.0.10
+    ports:
+      - "5000:5000"
+      - "6000:6000"
+    volumes:
+      - ./src/logs:/app/logs
+  node1:
+    build: .
+    container_name: node1
+    command: java -cp /app detector.simulador.NodeSimulator 5001
+    networks:
+      monitor_net:
+        ipv4_address: 172.20.0.2
+    depends_on:
+      - monitor
+  node2:
+    build: .
+    container_name: node2
+    command: java -cp /app detector.simulador.NodeSimulator 5002
+    networks:
+      monitor_net:
+        ipv4_address: 172.20.0.3
+    depends_on:
+      - monitor
+  node3:
+    build: .
+    container_name: node3
+    command: java -cp /app detector.simulador.NodeSimulator 5003
+    networks:
+      monitor_net:
+        ipv4_address: 172.20.0.4
+    depends_on:
+      - monitor
+networks:
+  monitor_net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
